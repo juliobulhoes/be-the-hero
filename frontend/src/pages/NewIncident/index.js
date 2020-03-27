@@ -1,0 +1,90 @@
+import React, { useState } from 'react';
+import { Link, useHistory } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { FiArrowLeft } from 'react-icons/fi';
+
+import api from '../../services/api';
+
+import { Container, Content, StyledSection, StyledForm } from './styles';
+
+import logoImg from '../../assets/logo.svg';
+
+export default function NewIncident() {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [value, setValue] = useState('');
+
+  const history = useHistory();
+
+  const ongId = localStorage.getItem('ongId');
+
+  async function handleNewIncident(e) {
+    e.preventDefault();
+
+    const data = {
+      title,
+      description,
+      value,
+    };
+
+    try {
+      await api.post('/incidents', data, {
+        headers: {
+          Authorization: ongId,
+        },
+      });
+
+      toast.success('Caso cadastrado com sucesso!', { autoClose: 3000 });
+
+      history.push('/profile');
+    } catch (err) {
+      toast.error('Erro ao cadastrar caso, tente novamente', {
+        autoClose: 3000,
+      });
+    }
+  }
+
+  return (
+    <Container>
+      <Content>
+        <StyledSection>
+          <img src={logoImg} alt="Be The Hero" />
+
+          <h1>Cadastrar novo caso</h1>
+          <p>
+            Descreva o caso detalhadamente para encontrar um herói para resolver
+            isso.
+          </p>
+
+          <Link className="back-link" to="/profile">
+            <FiArrowLeft size={16} color="#E02041" />
+            Voltar para home
+          </Link>
+        </StyledSection>
+
+        <StyledForm onSubmit={handleNewIncident}>
+          <input
+            placeholder="Título do caso"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+          />
+          <textarea
+            placeholder="Descrição"
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+          />
+          <input
+            type="number"
+            placeholder="Valor em reais"
+            value={value}
+            onChange={e => setValue(e.target.value)}
+          />
+
+          <button className="button" type="submit">
+            Cadastrar
+          </button>
+        </StyledForm>
+      </Content>
+    </Container>
+  );
+}
